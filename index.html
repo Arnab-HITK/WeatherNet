@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherNet</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="card">
+        <h2 class="App-name">WeatherNet</h2>
+        <div class="search">
+            <input type="text" placeholder="Enter city name" spellcheck="false">
+            <button><img src="images/search.png"></button>
+        </div>
+        <div class="error">
+            <p>City does not exist</p>
+        </div>
+        <div class="weather">
+            <img src="images/clouds.png" class="weather-icon">
+            <h1 class="temp">22°C</h1>
+            <h2 class="city">Kharagpur</h2>
+            <div class="info">
+                <div class="col">
+                    <img src="images/humidity.png">
+                    <div>
+                        <p>Humidity</p>
+                        <p class="humidity">66%</p>
+
+                    </div>
+                </div>
+                <div class="col">
+                    <img src="images/wind.png">
+                    <div>
+                        <p>Wind Speed</p>
+                        <p class="wind">45 km/h</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const apiKey="dd7f996cf1e78d6bdecba99e76e088c0";
+    const apiLink="https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+    const searchBox = document.querySelector(".search input");
+    const searchButton = document.querySelector(".search button");
+    const weatherIcon = document.querySelector(".weather-icon");
+    
+    async function checkWeather(city) {
+    try {
+        // Show loading state
+        document.querySelector(".error").style.display = "none";
+        document.querySelector(".weather").style.display = "none";
+        searchButton.disabled = true;
+        
+        const response = await fetch(apiLink + city + `&appid=${apiKey}`);
+        
+        // First check network response
+        if (!response.ok) {
+            // Handle 404 specifically
+            if (response.status === 404) {
+                throw new Error('City not found');
+            }
+            throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("API Response:", data); // Debugging
+        
+        // New validation logic - works with current API format
+        if (data.cod && data.cod !== 200) {
+            throw new Error(data.message || 'City not found');
+        }
+        
+        // Check for required fields
+        if (!data?.main?.temp || !data?.weather?.[0]?.main) {
+            throw new Error('Incomplete weather data');
+        }
+
+        // Update UI
+        document.querySelector(".city").innerHTML = data.name || city;
+        document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°C";
+        document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+        document.querySelector(".wind").innerHTML = data.wind.speed + " km/h";
+        
+        // Set weather icon
+        const weatherMain = data.weather[0].main.toLowerCase();
+        weatherIcon.src = `images/${weatherMain}.png` || "images/clear.png";
+        
+        // Display results
+        document.querySelector(".weather").style.display = "block";
+        
+    } catch(error) {
+        console.error("Weather fetch error:", error);
+        document.querySelector(".error p").textContent = 
+            error.message.includes("not found") ? 
+            "City not found" : "Weather service unavailable";
+        document.querySelector(".error").style.display = "block";
+    } finally {
+        searchButton.disabled = false;
+    }
+}
+
+searchButton.addEventListener("click", () => {
+    if (searchBox.value.trim() !== "") {
+        checkWeather(searchBox.value);
+    }
+});
+
+searchBox.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+      searchButton.click();
+  }
+});
+
+
+   
+    </script>
+</body>
+</html>
