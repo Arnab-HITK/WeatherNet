@@ -22,7 +22,7 @@
 Fresh data every 10 minutes from global sources  
 
 ✔ **Intuitive Design**  
-Clean interface with weather-adaptive colors  
+Clean UI  
 
 ✔ **Global Coverage**  
 200,000+ cities with local time display  
