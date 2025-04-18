@@ -48,6 +48,11 @@ body{
 .search button img{
     width: 25px;
 }
+
+.temp{
+    margin-bottom: 7px;
+}
+
 .weather-icon{
     width:  200px;
     margin-top: 10px;
